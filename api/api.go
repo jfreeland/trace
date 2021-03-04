@@ -12,6 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/jfreeland/trace/storage"
+	"github.com/jfreeland/trace/tracer"
 )
 
 // New creates a gin engine to serve HTTP requests.
@@ -31,16 +32,32 @@ func New() *gin.Engine {
 }
 
 // AddRoutes adds routes to our router.
-func AddRoutes(router *gin.Engine, db storage.Storage) {
-	routes := router.Group("/")
-	routes.GET("/", ReturnData(db))
-	routes.GET("/key/:key", ReturnSingleObject(db))
-	routes.POST("/", AddData(db))
-	routes.PUT("/", AddData(db))
+func AddRoutes(router *gin.Engine, db storage.Storage, tracer tracer.Tracer) {
+	routes := router.Group("/v0")
+	// routes.GET("/", ReturnData(db))
+	// routes.GET("/key/:key", ReturnSingleObject(db))
+	routes.POST("/start", AddTrace(db, tracer))
+	routes.DELETE("/stop", StopTrace(db, tracer))
+}
+
+// AddTrace adds a new traceroute
+func AddTrace(db storage.Storage, tracer tracer.Tracer) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		host := c.Request.Header.Get("TraceHost")
+		go tracer.Run(host)
+	}
+}
+
+// StopTrace stops a running traceroute
+func StopTrace(db storage.Storage, tracer tracer.Tracer) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		host := c.Request.Header.Get("TraceHost")
+		tracer.Stop(host)
+	}
 }
 
 // ReturnData handles HTTP GETs.
-func ReturnData(db storage.Storage) gin.HandlerFunc {
+func ReturnData(db storage.Storage, tracer tracer.Tracer) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.JSON(http.StatusOK, db.GetAll())
 	}

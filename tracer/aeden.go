@@ -73,6 +73,7 @@ func (a *Aeden) Stop(host string) {
 	trace, ok := running[host]
 	if !ok {
 		log.Error("trace did not exist")
+		return
 	}
 	delete(running, host)
 	trace.quitCh <- true

@@ -19,14 +19,13 @@ import (
 
 func main() {
 	// do something with a config
-	port := 50000
+	port := 8080
 
 	router := api.New()
 	db := storage.NewInMemory()
-	api.AddRoutes(router, db)
-
 	tracer := tracer.NewAeden(db)
-	go tracer.Run("google.com")
+	api.AddRoutes(router, db, tracer)
+	// go tracer.Run("google.com")
 
 	srv := &http.Server{
 		Addr:              fmt.Sprintf(":%d", port),
@@ -44,10 +43,10 @@ func main() {
 		}
 	}()
 
-	go func() {
-		time.Sleep(15 * time.Second)
-		tracer.Stop("google.com")
-	}()
+	// go func() {
+	// 	time.Sleep(15 * time.Second)
+	// 	tracer.Stop("google.com")
+	// }()
 
 	log.Infof("serving on: %d", port)
 
