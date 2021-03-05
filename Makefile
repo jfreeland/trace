@@ -17,6 +17,10 @@ up: build ## Do stuff
 start: ## Do stuff
 	curl -X POST http://localhost:50000/v0/start -H 'TraceHost: google.com'
 
+.PHONY: graph
+graph: ## Do stuff
+	curl -X GET http://localhost:50000/v0/graph -H 'TraceHost: google.com' | jq .
+
 .PHONY: stop
 stop: ## Do stuff
 	curl -X DELETE http://localhost:50000/v0/stop -H 'TraceHost: google.com'

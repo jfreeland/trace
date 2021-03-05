@@ -7,12 +7,14 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/jfreeland/traceroute"
 	tr "github.com/jfreeland/traceroute"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/jfreeland/trace/storage"
+	"github.com/jfreeland/trace/internal/data"
+	"github.com/jfreeland/trace/internal/storage"
 )
 
 var running = make(map[string]*Trace)
@@ -56,11 +58,11 @@ func (a *Aeden) Run(host string) {
 	defer close(waitCh)
 	trace := NewTrace(ctx, host, &wg, waitCh, quitCh)
 	running[host] = trace
-	go run(trace)
+	go a.run(trace)
 	for {
 		select {
 		case <-trace.waitCh:
-			go run(trace)
+			go a.run(trace)
 		case <-trace.quitCh:
 			cancel()
 			return
@@ -79,17 +81,33 @@ func (a *Aeden) Stop(host string) {
 	trace.quitCh <- true
 }
 
-func run(trace *Trace) {
+func (a *Aeden) run(trace *Trace) {
 	// defer trace.wg.Done()
 	// trace.wg.Add(1)
 	options := tr.Options{}
 	c := make(chan traceroute.Hop)
+	results := &data.TracerouteResult{}
 	go func() {
 		for {
 			hop, ok := <-c
 			if !ok {
 				return
 			}
+			_, ok = a.db.GetHost(hop.AddressString())
+			if !ok {
+				a.db.StoreHost(&data.Host{
+					IP: hop.AddressString(),
+					Meta: &data.HostMeta{
+						Address: hop.HostOrAddressString(),
+					},
+				})
+			}
+			host, _ := a.db.GetHost(hop.AddressString())
+			hopResult := &data.Hop{
+				Host:     host,
+				Duration: hop.ElapsedTime,
+			}
+			results.Hops = append(results.Hops, hopResult)
 			printHop(hop)
 		}
 	}()
@@ -97,6 +115,8 @@ func run(trace *Trace) {
 	if err != nil {
 		log.Printf("that sucks: %v", err)
 	}
+	results.Time = time.Now()
+	a.db.StoreResult(trace.host, results)
 	select {
 	case <-trace.ctx.Done():
 		return
@@ -106,13 +126,8 @@ func run(trace *Trace) {
 }
 
 func printHop(hop traceroute.Hop) {
-	addr := fmt.Sprintf("%v.%v.%v.%v", hop.Address[0], hop.Address[1], hop.Address[2], hop.Address[3])
-	hostOrAddr := addr
-	if hop.Host != "" {
-		hostOrAddr = hop.Host
-	}
 	if hop.Success {
-		fmt.Printf("%-3d %v (%v)  %v\n", hop.TTL, hostOrAddr, addr, hop.ElapsedTime)
+		fmt.Printf("%-3d %v (%v)  %v\n", hop.TTL, hop.AddressString(), hop.HostOrAddressString(), hop.ElapsedTime)
 	} else {
 		fmt.Printf("%-3d *\n", hop.TTL)
 	}

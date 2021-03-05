@@ -106,16 +106,20 @@ function dragended(event, d) {
   d.fy = null;
 }
 
-d3.json("files/first.json").then((data) => {
-  draw(data);
-});
+// d3.json("files/first.json").then((data) => {
+//   draw(data);
+// });
 
-// setTimeout(function () {
-//     d3.json('files/second.json')
-//         .then(data => {
-//             draw(data);
-//         });
-// }, 3000);
+setInterval(function () {
+  d3.json("v0/graph", {
+    headers: new Headers({
+      TraceHost: "google.com",
+    }),
+  }).then((data) => {
+    console.log(data);
+    draw(data);
+  });
+}, 5000);
 
 // setTimeout(function () {
 //     d3.json('files/third.json')
@@ -124,20 +128,20 @@ d3.json("files/first.json").then((data) => {
 //         });
 // }, 6000);
 
-document.getElementById("btn1").addEventListener("click", function () {
-  d3.json("files/first.json").then((data) => {
-    draw(data);
-  });
-});
+// document.getElementById("btn1").addEventListener("click", function () {
+//   d3.json("files/first.json").then((data) => {
+//     draw(data);
+//   });
+// });
 
-document.getElementById("btn2").addEventListener("click", function () {
-  d3.json("files/second.json").then((data) => {
-    draw(data);
-  });
-});
+// document.getElementById("btn2").addEventListener("click", function () {
+//   d3.json("files/second.json").then((data) => {
+//     draw(data);
+//   });
+// });
 
-document.getElementById("btn3").addEventListener("click", function () {
-  d3.json("files/third.json").then((data) => {
-    draw(data);
-  });
-});
+// document.getElementById("btn3").addEventListener("click", function () {
+//   d3.json("files/third.json").then((data) => {
+//     draw(data);
+//   });
+// });

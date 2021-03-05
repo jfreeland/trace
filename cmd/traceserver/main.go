@@ -12,9 +12,9 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/jfreeland/trace/api"
-	"github.com/jfreeland/trace/storage"
-	"github.com/jfreeland/trace/tracer"
+	"github.com/jfreeland/trace/internal/api"
+	"github.com/jfreeland/trace/internal/storage"
+	"github.com/jfreeland/trace/internal/tracer"
 )
 
 func main() {
