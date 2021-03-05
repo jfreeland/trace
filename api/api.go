@@ -8,9 +8,11 @@ import (
 	"time"
 
 	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/jfreeland/trace/api/routes"
 	"github.com/jfreeland/trace/storage"
 	"github.com/jfreeland/trace/tracer"
 )
@@ -38,6 +40,12 @@ func AddRoutes(router *gin.Engine, db storage.Storage, tracer tracer.Tracer) {
 	// routes.GET("/key/:key", ReturnSingleObject(db))
 	routes.POST("/start", AddTrace(db, tracer))
 	routes.DELETE("/stop", StopTrace(db, tracer))
+}
+
+func AddStatic(router *gin.Engine) {
+	const staticDir = "/ui"
+	router.Use(static.Serve("/", static.LocalFile(staticDir, true)))
+	router.Use(routes.Fallthrough(staticDir))
 }
 
 // AddTrace adds a new traceroute

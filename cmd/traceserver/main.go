@@ -25,7 +25,7 @@ func main() {
 	db := storage.NewInMemory()
 	tracer := tracer.NewAeden(db)
 	api.AddRoutes(router, db, tracer)
-	// go tracer.Run("google.com")
+	api.AddStatic(router)
 
 	srv := &http.Server{
 		Addr:              fmt.Sprintf(":%d", port),
@@ -42,11 +42,6 @@ func main() {
 			log.Errorf("listen: %v", err)
 		}
 	}()
-
-	// go func() {
-	// 	time.Sleep(15 * time.Second)
-	// 	tracer.Stop("google.com")
-	// }()
 
 	log.Infof("serving on: %d", port)
 

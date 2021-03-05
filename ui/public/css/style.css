@@ -1,0 +1,49 @@
+body {
+  margin: 0px;
+  overflow: hidden;
+}
+
+div {
+  text-align: center;
+}
+
+line {
+  stroke: #999;
+  stroke-opacity: 0.6;
+  stroke-width: 3;
+}
+
+text {
+  fill: black;
+  text-anchor: middle;
+}
+
+#node {
+  fill: #a5abb6;
+}
+
+line text {
+  fill: #666;
+  stroke: none;
+  font-size: 7px;
+}
+
+.node circle {
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 3px;
+}
+
+.node text {
+  font: 12px sans-serif;
+}
+
+.node--internal text {
+  text-shadow: 0 1px 0 #fff, 0 -1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff;
+}
+
+.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 2px;
+}
