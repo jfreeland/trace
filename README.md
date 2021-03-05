@@ -1,7 +1,10 @@
 # trace
 
 This requires docker to run.  At the moment this continuously runs a traceroute
-to google.com.
+to google.com and provides a UI that in theory should provide a network graph
+view of the topology.  I'm not doing anything with weights to indicate how many
+packets followed one path vs. another, colors to indicate loss, or labels to add
+rich data, yet.
 
 If you're using Docker for Mac you will need to enable experimental features for
 this to work as ICMP responses are not forwarded back to the host without
