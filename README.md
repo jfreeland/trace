@@ -12,6 +12,8 @@ experimental features due to VpnKit.  See
 https://github.com/docker/for-mac/issues/1381.  Go to Docker Preferences ->
 Docker Engine -> set `"experimental": true`, and Apply & Restart.
 
+I have not tried this on Docker for Windows.
+
 To get started:
 
 ```
