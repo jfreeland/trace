@@ -1,4 +1,5 @@
-// import * as d3 from "d3";
+import * as d3 from "d3";
+import MG from "metrics-graphics";
 
 const width = $(document).width() - 100;
 const height = $(document).height() - 100;
@@ -19,7 +20,7 @@ var simulation = d3
   .on("tick", ticked);
 
 const svg = d3
-  .select("div")
+  .select("#graph")
   .append("svg")
   .attr("viewBox", [-width / 2, -height / 2, width, height])
   .attr("height", height + margin.top + margin.bottom)
@@ -110,38 +111,27 @@ function dragended(event, d) {
 //   draw(data);
 // });
 
-setInterval(function () {
-  d3.json("v0/graph", {
-    headers: new Headers({
-      TraceHost: "google.com",
-    }),
-  }).then((data) => {
-    console.log(data);
-    draw(data);
+d3.json("files/metrics.json").then((data) => {
+  data = MG.convert.date(data, "date");
+  MG.data_graphic({
+    title: "Linked Graphic",
+    description: "Playing",
+    data: data,
+    width: 600,
+    height: 200,
+    right: 40,
+    xax_count: 4,
+    target: document.getElementById("metrics"),
   });
-}, 5000);
+});
 
-// setTimeout(function () {
-//     d3.json('files/third.json')
-//         .then(data => {
-//             draw(data);
-//         });
-// }, 6000);
-
-// document.getElementById("btn1").addEventListener("click", function () {
-//   d3.json("files/first.json").then((data) => {
+// setInterval(function () {
+//   d3.json("v0/graph", {
+//     headers: new Headers({
+//       TraceHost: "google.com",
+//     }),
+//   }).then((data) => {
+//     console.log(data);
 //     draw(data);
 //   });
-// });
-
-// document.getElementById("btn2").addEventListener("click", function () {
-//   d3.json("files/second.json").then((data) => {
-//     draw(data);
-//   });
-// });
-
-// document.getElementById("btn3").addEventListener("click", function () {
-//   d3.json("files/third.json").then((data) => {
-//     draw(data);
-//   });
-// });
+// }, 5000);
