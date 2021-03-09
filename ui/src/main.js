@@ -1,8 +1,8 @@
 import * as d3 from "d3";
-import MG from "metrics-graphics";
+import $ from "jquery";
 
 const width = $(document).width() - 100;
-const height = $(document).height() - 100;
+const height = $(document).height() * 0.9;
 const margin = { top: 10, right: 30, bottom: 10, left: 30 };
 const simulationDurationMs = 1250; // 1.25 second
 var startTime, endTime;
@@ -19,18 +19,18 @@ var simulation = d3
   .alphaDecay(0.001)
   .on("tick", ticked);
 
-const svg = d3
+const graph = d3
   .select("#graph")
   .append("svg")
   .attr("viewBox", [-width / 2, -height / 2, width, height])
   .attr("height", height + margin.top + margin.bottom)
   .attr("width", width + margin.left + margin.right);
 
-svg.append("g").attr("class", "links");
-svg.append("g").attr("class", "nodes");
+graph.append("g").attr("class", "links");
+graph.append("g").attr("class", "nodes");
 
-function draw(data) {
-  var nodeElements = svg
+function drawGraph(data) {
+  var nodeElements = graph
     .select(".nodes")
     .selectAll(".node")
     .data(data.nodes, (d) => d.id);
@@ -52,7 +52,7 @@ function draw(data) {
 
   nodeElements.exit().transition().duration("2000").remove();
 
-  var linkElements = svg.select(".links").selectAll(".link").data(data.links);
+  var linkElements = graph.select(".links").selectAll(".link").data(data.links);
   linkElements.enter().append("line").attr("class", "link").merge(linkElements);
   linkElements.exit().remove();
 
@@ -65,8 +65,8 @@ function draw(data) {
 
 function ticked() {
   if (Date.now() < endTime) {
-    var nodeElements = svg.select(".nodes").selectAll(".node");
-    var linkElements = svg.select(".links").selectAll(".link");
+    var nodeElements = graph.select(".nodes").selectAll(".node");
+    var linkElements = graph.select(".links").selectAll(".link");
 
     nodeElements
       .attr("transform", function (d) {
@@ -107,31 +107,97 @@ function dragended(event, d) {
   d.fy = null;
 }
 
-// d3.json("files/first.json").then((data) => {
-//   draw(data);
-// });
+// This is awful.  Come back to:
+// https://bl.ocks.org/robyngit/89327a78e22d138cff19c6de7288c1cf
+// https://bl.ocks.org/d3noob/6bd13f974d6516f3e491
 
-d3.json("files/metrics.json").then((data) => {
-  data = MG.convert.date(data, "date");
-  MG.data_graphic({
-    title: "Linked Graphic",
-    description: "Playing",
-    data: data,
-    width: 600,
-    height: 200,
-    right: 40,
-    xax_count: 4,
-    target: document.getElementById("metrics"),
+var metricsHeight = 300;
+
+const metrics = d3
+  .select("#metrics")
+  .append("svg")
+  .attr("height", metricsHeight + margin.top + margin.bottom)
+  .attr("width", width + margin.left + margin.right)
+  .append("g")
+  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+var x = d3.scaleLinear().range([0, width]);
+var xAxis = d3.axisBottom().scale(x);
+metrics
+  .append("g")
+  .attr("transform", "translate(0," + metricsHeight + ")")
+  .attr("class", "xAxis");
+
+var y = d3.scaleLinear().range([metricsHeight, 0]);
+var yAxis = d3.axisLeft().scale(y);
+metrics.append("g").attr("class", "yAxis");
+
+function drawMetrics(data) {
+  x.domain([
+    0,
+    d3.max(data, function (d) {
+      return d.date;
+    }),
+  ]);
+  metrics.selectAll(".xAxis").transition().duration(1000).call(xAxis);
+
+  y.domain([
+    0,
+    d3.max(data, function (d) {
+      return d.value;
+    }),
+  ]);
+  metrics.selectAll(".yAxis").transition().duration(1000).call(yAxis);
+
+  var updateMetrics = metrics.selectAll(".line").data([data], function (d) {
+    return d.date;
   });
-});
 
-// setInterval(function () {
-//   d3.json("v0/graph", {
-//     headers: new Headers({
-//       TraceHost: "google.com",
-//     }),
-//   }).then((data) => {
-//     console.log(data);
-//     draw(data);
-//   });
-// }, 5000);
+  updateMetrics
+    .enter()
+    .append("path")
+    .attr("class", "line")
+    .merge(updateMetrics)
+    .transition()
+    .duration(1000)
+    .attr(
+      "d",
+      d3
+        .line()
+        .x(function (d) {
+          return x(d.date);
+        })
+        .y(function (d) {
+          return y(d.value);
+        })
+    )
+    .attr("fill", "none")
+    .attr("stroke", "steelblue")
+    .attr("stroke-width", 2.5);
+}
+
+setInterval(function () {
+  d3.json("v0/metrics", {
+    headers: new Headers({
+      TraceHost: "google.com",
+    }),
+  }).then((data) => {
+    var parseTime = d3.timeParse("%Y-%m-%dT%H:%M:%S.%LZ");
+    data.forEach(function (d, i) {
+      d.date = parseTime(d.date);
+    });
+    console.log(data);
+    drawMetrics(data);
+  });
+}, 5000);
+
+setInterval(function () {
+  d3.json("v0/graph", {
+    headers: new Headers({
+      TraceHost: "google.com",
+    }),
+  }).then((data) => {
+    console.log(data);
+    drawGraph(data);
+  });
+}, 5000);

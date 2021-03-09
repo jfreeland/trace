@@ -1,5 +1,5 @@
 {
-  "name": "d3demo",
+  "name": "trace",
   "version": "0.1.0",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -10,14 +10,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jfreeland/d3demo.git"
+    "url": "git+https://github.com/jfreeland/trace.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/jfreeland/d3demo/issues"
+    "url": "https://github.com/jfreeland/trace/issues"
   },
-  "homepage": "https://github.com/jfreeland/d3demo#readme",
+  "homepage": "https://github.com/jfreeland/trace#readme",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^17.0.0",
     "@rollup/plugin-node-resolve": "^11.1.0",
@@ -29,6 +29,7 @@
     "serve": "^11.3.2"
   },
   "dependencies": {
-    "d3": "^6.5.0"
+    "d3": "^6.5.0",
+    "jquery": "^3.6.0"
   }
 }

@@ -6,7 +6,7 @@ RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /go/bin/trace-server cmd/traceserver/main.go
 
-FROM node:15 as ui_builder
+FROM node:current-alpine3.13 as ui_builder
 WORKDIR /src/ui
 COPY ./ui .
 RUN npm install && \

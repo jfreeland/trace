@@ -7,22 +7,22 @@ import (
 	"github.com/jfreeland/trace/internal/storage"
 )
 
-type Node struct {
+type GraphNode struct {
 	ID string `json:"id"`
 }
 
-type Edge struct {
+type GraphEdge struct {
 	Source string `json:"source"`
 	Target string `json:"target"`
 	// TODO: Add weight.
 }
 
 type GraphResult struct {
-	Nodes []*Node `json:"nodes"`
-	Links []*Edge `json:"links"`
+	Nodes []*GraphNode `json:"nodes"`
+	Links []*GraphEdge `json:"links"`
 }
 
-// GetGraph adds a new traceroute
+// GetGraph returns a graph of a traceroute
 func GetGraph(db storage.Storage) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		host := c.Request.Header.Get("TraceHost")
@@ -32,19 +32,19 @@ func GetGraph(db storage.Storage) gin.HandlerFunc {
 
 			return
 		}
-		var nodes []*Node
-		var edges []*Edge
+		var nodes []*GraphNode
+		var edges []*GraphEdge
 		for _, result := range results {
 			hopCount := len(result.Hops)
 			for idx, hop := range result.Hops {
 				if !nodeInNodes(hop.Host.IP, nodes) {
-					node := &Node{
+					node := &GraphNode{
 						ID: hop.Host.IP,
 					}
 					nodes = append(nodes, node)
 				}
 				if idx < hopCount-1 {
-					edge := &Edge{
+					edge := &GraphEdge{
 						Source: hop.Host.IP,
 						Target: result.Hops[idx+1].Host.IP,
 					}
@@ -61,7 +61,7 @@ func GetGraph(db storage.Storage) gin.HandlerFunc {
 	}
 }
 
-func nodeInNodes(n string, nodes []*Node) bool {
+func nodeInNodes(n string, nodes []*GraphNode) bool {
 	for _, node := range nodes {
 		if n == node.ID {
 			return true
@@ -70,7 +70,7 @@ func nodeInNodes(n string, nodes []*Node) bool {
 	return false
 }
 
-func edgeInEdges(e *Edge, edges []*Edge) bool {
+func edgeInEdges(e *GraphEdge, edges []*GraphEdge) bool {
 	for _, edge := range edges {
 		if (e.Source == edge.Source && e.Target == edge.Target) || (e.Source == edge.Target && e.Target == edge.Source) {
 			return true

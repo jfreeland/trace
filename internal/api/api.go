@@ -34,6 +34,7 @@ func AddRoutes(router *gin.Engine, db storage.Storage, tracer tracer.Tracer) {
 	// routes.GET("/", ReturnData(db))
 	// routes.GET("/key/:key", ReturnSingleObject(db))
 	apiRoutes.GET("/graph", routes.GetGraph(db))
+	apiRoutes.GET("/metrics", routes.GetMetrics(db))
 	apiRoutes.POST("/start", routes.AddTrace(db, tracer))
 	apiRoutes.DELETE("/stop", routes.StopTrace(db, tracer))
 }
